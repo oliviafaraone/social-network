@@ -4,11 +4,13 @@ const { Schema, model } = require("mongoose");
 const reactionSchema = new Schema (
     {
       reationId: {
-          type: Schema.Types.ObjectId
+          type: Schema.Types.ObjectId,
+          default: () => new Types.ObjectId()
     },
     reactionBody: {
         type: String,
         required: true,
+        maxlength: 280
       //Max 280 characters
 
     },
@@ -21,13 +23,20 @@ const reactionSchema = new Schema (
        default: Date.now,
        //Use a getter method to format the timestamp on query
    }
-  });
+  },
+  {
+    toJSON: {
+      getters: true
+    }
+  }
+  );
 
 const ThoughtSchema = new Schema(
   {
     thoughtText: {
       type: String,
       required: true,
+      validate: [({ length }) => 280 >= length >= 1, 'Password should be between 1-280']
       //Must be between 1 and 280 characters
     },
     createdAt: {
@@ -35,7 +44,7 @@ const ThoughtSchema = new Schema(
       default: Date.now,
       //Use a getter method to format the timestamp on query
   },
-  user: [
+  username: [
     {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -47,10 +56,7 @@ const ThoughtSchema = new Schema(
 
 //
   ThoughtSchema.virtual("reactionCount").get(function () {
-    return this.reactions.reduce(
-      (total, reactions) => total + reactions.length + 1,
-      0
-    );
+    return this.reactions.length;
   });
 
 

@@ -3,7 +3,7 @@ const { Schema, model } = require("mongoose");
 
 const UserSchema = new Schema(
   {
-    userName: {
+    username: {
       type: String,
       unique: true,
       required: true,
@@ -16,12 +16,6 @@ const UserSchema = new Schema(
         //validate to match valid email address
         match: [/.+@.+\..+/]
       },
-    size: {
-      type: String,
-      required: true,
-      enum: ["Personal", "Small", "Medium", "Large", "Extra Large"],
-      default: "Large",
-    },
     thoughts: [
       {
         type: Schema.Types.ObjectId,
@@ -37,14 +31,19 @@ const UserSchema = new Schema(
       ],
       
   },
+  {
+    toJSON: {
+      virtuals: true,
+      getters: true
+    },
+    // prevents virtuals from creating duplicate of _id as `id`
+    id: false
+  }
 );
 //Added after updating comments field above
 // get total count of comments and replies on retrieval
 UserSchema.virtual("friendCount").get(function () {
-    return this.comments.reduce(
-      (total, comment) => total + comment.replies.length + 1,
-      0
-    );
+    return this.friends.length;
   });
 
 //Now we need to actually create the model to get the prebuilt methods that Mongoose provides. Let's add the following code to create the model and export it at the bottom of Pizza.js:
